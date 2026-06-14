@@ -45,6 +45,8 @@ Now activate the environment:
 
 #### YouTube Tuturial (Hindi) - https://youtu.be/ctHby5vhDqg
 
+#### YouTube Tuturial (English) -  https://youtu.be/_5XF5CCnbDk
+
 ---
 
 # Step 2: Install Dependencies
