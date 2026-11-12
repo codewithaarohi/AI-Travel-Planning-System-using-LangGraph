@@ -1,0 +1,23 @@
+# Secrets: API keys and the database password. Never commit these.
+.env
+.env.*
+!.env.example
+.streamlit/secrets.toml
+
+# Python bytecode
+__pycache__/
+*.py[cod]
+
+# Virtual environments (the README creates langgraph_env3)
+langgraph_env3/
+venv/
+.venv/
+env/
+
+# Travel plans the app writes on every run
+travel_plans/
+
+# Editor and OS files
+.vscode/
+.idea/
+.DS_Store

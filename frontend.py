@@ -10,18 +10,118 @@ st.set_page_config(
     layout="wide"
 )
 
+# ── Theme ─────────────────────────────────────────────────────────────────────
+# Dark is the default. Light mode is kept in the URL (?theme=light) so it survives a refresh.
+if "dark_mode" not in st.session_state:
+    st.session_state.dark_mode = st.query_params.get("theme") != "light"
+
+
+def _sync_theme_param():
+    if st.session_state.dark_mode:
+        st.query_params.pop("theme", None)
+    else:
+        st.query_params["theme"] = "light"
+
+
+PALETTES = {
+    "dark": {
+        "app-bg": "#080d14",
+        "sidebar-bg": "#090e18",
+        "sidebar-border": "#141f30",
+        "surface": "#0e1623",
+        "surface-alt": "#0e1a2b",
+        "surface-sunken": "#0a1520",
+        "card-bg": "#0e1a2e",
+        "border": "#1e2e44",
+        "border-alt": "#1a2e44",
+        "border-card": "#1e3050",
+        "text": "#cce0f5",
+        "text-strong": "#e8f4ff",
+        "heading": "#e0edf8",
+        "text-sidebar": "#a0c4e0",
+        "text-muted": "#7aa8cc",
+        "text-save": "#8ab8d8",
+        "accent-text": "#7ab8f5",
+        "metric-val": "#4ea8f0",
+        "link": "#4ea8f0",
+        "placeholder": "#4a6a85",
+        "placeholder-input": "#3a5570",
+        "accent": "#3a7bd5",
+        "focus-ring": "rgba(58,123,213,0.2)",
+        "final-bg": "linear-gradient(160deg, #0c1a2e 0%, #0a1520 100%)",
+        "final-border": "#1e3a5c",
+        "download-bg": "#1a3a5c",
+        "download-text": "#e8f4ff",
+        "download-border": "#2a5080",
+        "chip-bg": "#111b2b",
+        "chip-bg-hover": "#1a2e47",
+        "chip-text": "#f7fdf4",
+        "toggle-off": "#4a6a85",
+        "alert-bg": "#2a2410",
+        "alert-border": "#5c4a14",
+        "btn-shadow": "0 0 24px rgba(26,107,191,0.35), 0 4px 15px rgba(0,0,0,0.4)",
+        "btn-shadow-hover": "0 0 40px rgba(26,107,191,0.6), 0 6px 20px rgba(0,0,0,0.5)",
+    },
+    "light": {
+        "app-bg": "#f4f7fb",
+        "sidebar-bg": "#e9eff6",
+        "sidebar-border": "#d3deea",
+        "surface": "#ffffff",
+        "surface-alt": "#ffffff",
+        "surface-sunken": "#f8fafd",
+        "card-bg": "#ffffff",
+        "border": "#d5e1ee",
+        "border-alt": "#cbd9e8",
+        "border-card": "#cbd9e8",
+        "text": "#1f3347",
+        "text-strong": "#0d2236",
+        "heading": "#0d2236",
+        "text-sidebar": "#2c4a66",
+        "text-muted": "#4f6b85",
+        "text-save": "#3d5f7f",
+        "accent-text": "#1a5fa8",
+        "metric-val": "#1a6bbf",
+        "link": "#1565c0",
+        "placeholder": "#7d93a8",
+        "placeholder-input": "#7d93a8",
+        "accent": "#3a7bd5",
+        "focus-ring": "rgba(58,123,213,0.25)",
+        "final-bg": "linear-gradient(160deg, #ffffff 0%, #f1f6fc 100%)",
+        "final-border": "#cddcec",
+        "download-bg": "#e3eefa",
+        "download-text": "#0d2236",
+        "download-border": "#b9d0ea",
+        "chip-bg": "#ffffff",
+        "chip-bg-hover": "#eef4fb",
+        "chip-text": "#1f3347",
+        "toggle-off": "#7d93a8",
+        "alert-bg": "#fff6db",
+        "alert-border": "#f0d78a",
+        "btn-shadow": "0 0 18px rgba(26,107,191,0.22), 0 4px 12px rgba(13,34,54,0.12)",
+        "btn-shadow-hover": "0 0 28px rgba(26,107,191,0.35), 0 6px 16px rgba(13,34,54,0.18)",
+    },
+}
+
+_palette = PALETTES["dark" if st.session_state.dark_mode else "light"]
+st.markdown(
+    "<style>:root {" + "".join(f"--{name}: {value};" for name, value in _palette.items()) + "}</style>",
+    unsafe_allow_html=True,
+)
+
 st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
 html, body, .stApp {
     font-family: 'Inter', sans-serif;
-    background-color: #080d14;
+    background-color: var(--app-bg);
+    color: var(--text);
 }
 
 /* ── Hero ── */
 .hero-wrapper {
     position: relative;
+    background: #080d14;  /* fixed dark backdrop: the photo doesn't span the full width */
     border-radius: 20px;
     overflow: hidden;
     margin-bottom: 2rem;
@@ -75,14 +175,14 @@ html, body, .stApp {
 
 /* ── Input card ── */
 .input-card {
-    background: #0e1623;
-    border: 1px solid #1e2e44;
+    background: var(--surface);
+    border: 1px solid var(--border);
     border-radius: 16px;
     padding: 1.6rem 1.8rem;
     margin-bottom: 1.5rem;
 }
 .input-label {
-    color: #7ab8f5;
+    color: var(--accent-text);
     font-size: 0.8rem;
     font-weight: 600;
     letter-spacing: 0.1em;
@@ -98,16 +198,16 @@ html, body, .stApp {
     margin: 0.8rem 0 1.2rem;
 }
 .dest-chip {
-    background: #111b2b;
-    border: 1px solid #1e3050;
-    color: #f7fdf4;
+    background: var(--chip-bg);
+    border: 1px solid var(--border-card);
+    color: var(--chip-text);
     padding: 0.35rem 0.85rem;
     border-radius: 20px;
     font-size: 0.82rem;
     cursor: pointer;
     transition: all 0.2s;
 }
-.dest-chip:hover { background: #1a2e47; border-color: #3a7bd5; color: #fff; }
+.dest-chip:hover { background: var(--chip-bg-hover); border-color: var(--accent); color: var(--text-strong); }
 
 /* ── Generate button ── */
 div[data-testid="stButton"] > button {
@@ -120,11 +220,11 @@ div[data-testid="stButton"] > button {
     font-weight: 700 !important;
     letter-spacing: 0.03em !important;
     width: 100% !important;
-    box-shadow: 0 0 24px rgba(26,107,191,0.35), 0 4px 15px rgba(0,0,0,0.4) !important;
+    box-shadow: var(--btn-shadow) !important;
     transition: all 0.3s ease !important;
 }
 div[data-testid="stButton"] > button:hover {
-    box-shadow: 0 0 40px rgba(26,107,191,0.6), 0 6px 20px rgba(0,0,0,0.5) !important;
+    box-shadow: var(--btn-shadow-hover) !important;
     transform: translateY(-2px) !important;
     background: linear-gradient(135deg, #2278d4 0%, #1057a0 50%, #0d4a8a 100%) !important;
 }
@@ -132,26 +232,19 @@ div[data-testid="stButton"] > button:active {
     transform: translateY(0px) !important;
 }
 
-/* ── Agent status cards ── */
-[data-testid="stStatusWidget"] {
-    background: #0e1a2e !important;
-    border: 1px solid #1e3050 !important;
+/* ── Agent result cards (st.status renders as an expander) ── */
+[data-testid="stExpander"] details {
+    background: var(--surface-sunken) !important;
+    border: 1px solid var(--border-card) !important;
     border-radius: 12px !important;
 }
-[data-testid="stStatusWidget"] > div:first-child {
-    background: #0e1a2e !important;
+[data-testid="stExpander"] summary {
+    background: var(--card-bg) !important;
     border-radius: 12px 12px 0 0 !important;
 }
-[data-testid="stStatusWidget"] details,
-[data-testid="stStatusWidget"] details > div,
-[data-testid="stStatusWidget"] [data-testid="stVerticalBlock"] {
-    background: #0a1520 !important;
-    color: #ffffff !important;
-    padding: 0.25rem 0.5rem !important;
-}
-[data-testid="stStatusWidget"] * { color: #ffffff !important; }
-[data-testid="stStatusWidget"] a { color: #4ea8f0 !important; }
-[data-testid="stStatusWidget"] hr { border-color: #1e3050 !important; }
+[data-testid="stExpander"] summary,
+[data-testid="stExpander"] summary * { color: var(--heading) !important; }
+[data-testid="stExpander"] hr { border-color: var(--border-card) !important; }
 
 /* ── Section headers ── */
 .sec-head {
@@ -160,9 +253,9 @@ div[data-testid="stButton"] > button:active {
     gap: 0.6rem;
     margin: 2rem 0 0.75rem;
     padding-bottom: 0.5rem;
-    border-bottom: 1px solid #1e2e44;
+    border-bottom: 1px solid var(--border);
 }
-.sec-head span { font-size: 1.15rem; font-weight: 600; color: #e0edf8; }
+.sec-head span { font-size: 1.15rem; font-weight: 600; color: var(--heading); }
 
 /* ── Metric bar ── */
 .metric-row {
@@ -172,89 +265,108 @@ div[data-testid="stButton"] > button:active {
 }
 .metric-box {
     flex: 1;
-    background: #0e1623;
-    border: 1px solid #1e2e44;
+    background: var(--surface);
+    border: 1px solid var(--border);
     border-radius: 12px;
     padding: 1rem 1.2rem;
     text-align: center;
 }
-.metric-val { font-size: 1.8rem; font-weight: 700; color: #4ea8f0; }
-.metric-lbl { font-size: 0.78rem; color: #5a7a96; margin-top: 0.2rem; text-transform: uppercase; letter-spacing: 0.08em; }
+.metric-val { font-size: 1.8rem; font-weight: 700; color: var(--metric-val); }
+.metric-lbl { font-size: 0.78rem; color: var(--text-muted) !important; margin-top: 0.2rem; text-transform: uppercase; letter-spacing: 0.08em; }
 
 /* ── Final plan ── */
 .final-card {
-    background: linear-gradient(160deg, #0c1a2e 0%, #0a1520 100%);
-    border: 1px solid #1e3a5c;
-    border-left: 4px solid #3a7bd5;
+    background: var(--final-bg);
+    border: 1px solid var(--final-border);
+    border-left: 4px solid var(--accent);
     border-radius: 14px;
     padding: 1.8rem;
     line-height: 1.8;
-    color: #cce0f5;
+    color: var(--text);
     font-size: 0.95rem;
 }
 
 /* ── Save bar ── */
 .save-bar {
-    background: #0e1623;
-    border: 1px solid #1e2e44;
+    background: var(--surface);
+    border: 1px solid var(--border);
     border-radius: 10px;
     padding: 0.85rem 1.2rem;
-    color: #5a8ab0;
+    color: var(--text-save) !important;
     font-size: 0.88rem;
     margin-top: 0.5rem;
 }
+.save-bar code { color: var(--accent-text) !important; background: var(--surface-sunken) !important; }
 
 /* ── Sidebar ── */
 section[data-testid="stSidebar"] {
-    background: #090e18 !important;
-    border-right: 1px solid #141f30 !important;
+    background: var(--sidebar-bg) !important;
+    border-right: 1px solid var(--sidebar-border) !important;
 }
 .sidebar-chip {
-    background: #0e1a2b;
-    border: 1px solid #1a2e44;
+    background: var(--surface-alt);
+    border: 1px solid var(--border-alt);
     border-radius: 8px;
     padding: 0.45rem 0.75rem;
     margin-bottom: 0.4rem;
     font-size: 0.83rem;
-    color: #7aa8cc;
+    color: var(--text-muted);
 }
-.sidebar-title { color: #e0edf8; font-size: 1rem; font-weight: 600; margin: 1rem 0 0.5rem; }
+.sidebar-title { color: var(--heading); font-size: 1rem; font-weight: 600; margin: 1rem 0 0.5rem; }
 
 /* Hide branding */
 #MainMenu, footer, header { visibility: hidden; }
 
 /* Textarea */
-.stTextArea textarea {
-    background: #0a1520 !important;
-    border: 1px solid #1e2e44 !important;
+/* Text area and text input: Streamlit draws the border on a wrapper (…RootElement), so the
+   border, background and focus ring go there and the inner field is borderless. */
+[data-testid="stTextAreaRootElement"] {
+    background: var(--surface-sunken) !important;
+    border: 1px solid var(--border) !important;
     border-radius: 10px !important;
-    color: #e8f4ff !important;
+}
+[data-testid="stTextInputRootElement"] {
+    background: var(--surface-alt) !important;
+    border: 1px solid var(--border-alt) !important;
+    border-radius: 8px !important;
+}
+[data-testid="stTextAreaRootElement"]:focus-within,
+[data-testid="stTextInputRootElement"]:focus-within {
+    border-color: var(--accent) !important;
+    box-shadow: 0 0 0 2px var(--focus-ring) !important;
+}
+.stTextArea textarea {
+    background: transparent !important;
+    border: none !important;
+    color: var(--text-strong) !important;
     font-size: 0.95rem !important;
     resize: none !important;
 }
-.stTextArea textarea:focus {
-    border-color: #3a7bd5 !important;
-    box-shadow: 0 0 0 2px rgba(58,123,213,0.2) !important;
-}
-.stTextArea textarea::placeholder { color: #4a6a85 !important; }
+.stTextArea textarea::placeholder { color: var(--placeholder) !important; }
 
 /* Text input (sidebar User ID field) */
 input[type="text"], .stTextInput input {
-    background: #0e1a2b !important;
-    border: 1px solid #1a2e44 !important;
-    border-radius: 8px !important;
-    color: #e0edf8 !important;
+    background: transparent !important;
+    border: none !important;
+    color: var(--heading) !important;
 }
-input[type="text"]:focus, .stTextInput input:focus {
-    border-color: #3a7bd5 !important;
-    box-shadow: 0 0 0 2px rgba(58,123,213,0.2) !important;
-}
-input[type="text"]::placeholder { color: #3a5570 !important; }
+input[type="text"]::placeholder { color: var(--placeholder-input) !important; }
 
-/* All Streamlit labels — dark bg → light text */
+/* Sidebar dark-mode toggle: Streamlit colours it from the device theme otherwise */
+[data-testid="stCheckbox"] label > div:not([data-testid]) {
+    background: var(--toggle-off) !important;
+    border-color: var(--toggle-off) !important;
+}
+[data-testid="stCheckbox"] label:has(input:checked) > div:not([data-testid]) {
+    background: var(--accent) !important;
+    border-color: var(--accent) !important;
+}
+[data-testid="stCheckbox"] label > div:not([data-testid]) > div { background: #ffffff !important; }
+
+/* Streamlit widget labels */
 .stTextInput label, .stTextArea label,
 .stSelectbox label, .stNumberInput label {
-    color: #7ab8f5 !important;
+    color: var(--accent-text) !important;
     font-size: 0.82rem !important;
     font-weight: 600 !important;
     letter-spacing: 0.08em !important;
@@ -262,39 +374,40 @@ input[type="text"]::placeholder { color: #3a5570 !important; }
 
 /* General markdown / paragraph text */
 .stMarkdown p, .stMarkdown li, .stMarkdown td, .stMarkdown th {
-    color: #cce0f5 !important;
+    color: var(--text) !important;
 }
-.stMarkdown h1, .stMarkdown h2, .stMarkdown h3 { color: #e8f4ff !important; }
+.stMarkdown td, .stMarkdown th { border-color: var(--border) !important; }
+.stMarkdown h1, .stMarkdown h2, .stMarkdown h3, .stMarkdown h4 { color: var(--text-strong) !important; }
+.stMarkdown a { color: var(--link) !important; }
 .stMarkdown code {
-    background: #0e1a2b !important;
-    color: #7ab8f5 !important;
+    background: var(--surface-alt) !important;
+    color: var(--accent-text) !important;
     padding: 0.15em 0.4em;
     border-radius: 4px;
 }
+hr { border-color: var(--border) !important; }
 
-/* Metric labels — was #5a7a96 (too dim on dark bg) */
-.metric-lbl { color: #7aa8cc !important; }
-
-/* Save bar — was #5a8ab0 (slightly dim) */
-.save-bar { color: #8ab8d8 !important; }
-.save-bar code { color: #7ab8f5 !important; background: #0a1520 !important; }
-
-/* Streamlit warning / info / success on dark bg */
-.stAlert { background: #0e1a2b !important; border-radius: 10px !important; }
-.stAlert p, .stAlert div { color: #e0edf8 !important; }
+/* Streamlit warning ("Please describe your trip first"); its box is device-themed otherwise */
+.stAlert { background: var(--surface-alt) !important; border-radius: 10px !important; }
+[data-testid="stAlertContainer"] {
+    background: var(--alert-bg) !important;
+    border: 1px solid var(--alert-border) !important;
+    border-radius: 10px !important;
+}
+.stAlert p, .stAlert div { color: var(--heading) !important; }
 
 /* Sidebar text & dividers */
 section[data-testid="stSidebar"] p,
 section[data-testid="stSidebar"] span,
 section[data-testid="stSidebar"] label,
-section[data-testid="stSidebar"] .stMarkdown { color: #a0c4e0 !important; }
-section[data-testid="stSidebar"] hr { border-color: #1a2e44 !important; }
+section[data-testid="stSidebar"] .stMarkdown { color: var(--text-sidebar) !important; }
+section[data-testid="stSidebar"] hr { border-color: var(--border-alt) !important; }
 
-/* Download button — light bg → dark text  */
+/* Download button */
 div[data-testid="stDownloadButton"] > button {
-    background: #1a3a5c !important;
-    color: #e8f4ff !important;
-    border: 1px solid #2a5080 !important;
+    background: var(--download-bg) !important;
+    color: var(--download-text) !important;
+    border: 1px solid var(--download-border) !important;
     border-radius: 10px !important;
 }
 </style>
@@ -302,6 +415,7 @@ div[data-testid="stDownloadButton"] > button {
 
 # ── Sidebar ───────────────────────────────────────────────────────────────────
 with st.sidebar:
+    st.toggle("🌙 Dark mode", key="dark_mode", on_change=_sync_theme_param)
     st.markdown("<div class='sidebar-title'>🌍 AI Travel Planner</div>", unsafe_allow_html=True)
     st.markdown("---")
 
@@ -309,7 +423,7 @@ with st.sidebar:
                               help="Your session ID — keeps travel history across queries")
 
     st.markdown("<div class='sidebar-title'>Powered by</div>", unsafe_allow_html=True)
-    for tech in ["🔗 LangGraph", "🧠 Groq · LLaMA 3.3 70B", "🐘 PostgreSQL", "🔍 Tavily Search", "✈️ AviationStack"]:
+    for tech in ["🔗 LangGraph", "🧠 Groq · GPT-OSS 120B", "🐘 PostgreSQL", "🔍 Tavily Search", "✈️ AviationStack"]:
         st.markdown(f"<div class='sidebar-chip'>{tech}</div>", unsafe_allow_html=True)
 
     st.markdown("<div class='sidebar-title'>Agent Pipeline</div>", unsafe_allow_html=True)
@@ -357,15 +471,19 @@ st.markdown("<div class='input-label'>🗺️ Describe your trip</div>", unsafe_
 
 QUICK = ["7-day Japan under ₹2L", "Paris trip for 5 days", "Dubai weekend trip", "Bali backpacking 10 days"]
 qcols = st.columns(len(QUICK))
-quick_fill = ""
+
+# The text area is keyed so it keeps its value across reruns; quick-pick buttons
+# write into its session state via a callback (runs before the rerun).
+def _quick_fill(label):
+    st.session_state["trip_query"] = label
+
 for qc, label in zip(qcols, QUICK):
     with qc:
-        if st.button(label, key=f"q_{label}"):
-            quick_fill = label
+        st.button(label, key=f"q_{label}", on_click=_quick_fill, args=(label,))
 
 user_query = st.text_area(
     "",
-    value=quick_fill,
+    key="trip_query",
     placeholder="e.g. Plan a complete 7-day Japan trip including flights, hotels and sightseeing under ₹2 lakhs",
     height=100,
     label_visibility="collapsed",
