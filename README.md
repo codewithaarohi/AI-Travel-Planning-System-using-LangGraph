@@ -21,7 +21,7 @@ The system uses 4 AI agents that work together to plan a complete trip automatic
 - LangGraph
 - LangChain
 - Groq
-- [Llama 3.3 70B Versatile](https://console.groq.com/docs/model/llama-3.3-70b-versatile)
+- [Llama 3.3 70B Versatile]
 - PostgreSQL
 - Streamlit
 - Tavily API
@@ -135,7 +135,11 @@ This will test the multi-agent system through the terminal.
 #### Run Streamlit Web App
 
 
-		streamlit run frontend.py
+```powershell
+streamlit run frontend.py --server.address localhost --server.port 8501
+```
+
+Open the app at http://localhost:8501.
 
 
 This will launch the Multi-Agent AI web application.
