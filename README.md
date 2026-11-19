@@ -21,7 +21,7 @@ The system uses 4 AI agents that work together to plan a complete trip automatic
 - LangGraph
 - LangChain
 - Groq
-- Llama 3.3 70B
+- [Llama 3.3 70B Versatile](https://console.groq.com/docs/model/llama-3.3-70b-versatile)
 - PostgreSQL
 - Streamlit
 - Tavily API
@@ -40,8 +40,11 @@ Now activate the environment:
 
 #### Windows
 
-		langgraph_env3\Scripts\activate
+		langgraph_env3\Scripts\activate.bat
 
+
+
+uv pip install --python .\langgraph_env3\Scripts\python.exe -r .\requirements.txt
 
 #### YouTube Tuturial (Hindi) - https://youtu.be/ctHby5vhDqg
 
